@@ -184,10 +184,40 @@ footer {
   100% { transform: translateY(-20px); opacity: 0.2; }
 }
 
+/* ===== BACKGROUND BASE ===== */
+.background {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #121212 0%, #000 70%);
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* ===== EMBER PARTICLES ===== */
+.background::before,
 .background::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(255,138,42,0.08) 0%, transparent 60%);
-  animation: float 8s ease-in-out infinite;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(circle, rgba(255,138,42,0.6) 1px, transparent 2px);
+  background-size: 80px 80px;
+  opacity: 0.15;
+  animation: drift 20s linear infinite;
+}
+
+/* second layer for depth */
+.background::after {
+  background-size: 120px 120px;
+  opacity: 0.08;
+  animation-duration: 35s;
+}
+
+@keyframes drift {
+  0% {
+    transform: translateY(0px) translateX(0px);
+  }
+  100% {
+    transform: translateY(-200px) translateX(-100px);
+  }
 }
