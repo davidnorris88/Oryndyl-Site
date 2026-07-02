@@ -72,9 +72,11 @@ body {
   font-size: 72px;
   letter-spacing: 14px;
   font-weight: 200;
-  background: linear-gradient(90deg, #fff, #ff8a2a);
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #ffffff, #ff8a2a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(255,138,42,0.15);
 }
 
 .tagline {
