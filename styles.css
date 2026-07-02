@@ -264,4 +264,34 @@ footer {
     transform: translateY(-800px) scale(1.5);
     opacity: 0;
   }
+.embers span {
+  filter: blur(0.3px);
+}
+
+/* some embers closer (brighter) */
+.embers span:nth-child(3n) {
+  width: 5px;
+  height: 5px;
+  opacity: 1;
+  box-shadow: 0 0 14px rgba(255,138,42,1);
+}
+
+/* some farther away (softer) */
+.embers span:nth-child(2n) {
+  opacity: 0.4;
+  filter: blur(1px);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(255,138,42,0.06), transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+  animation: fogMove 12s ease-in-out infinite;
+}
+
+@keyframes fogMove {
+  0%, 100% { transform: scale(1) translateY(0px); opacity: 0.6; }
+  50% { transform: scale(1.05) translateY(-10px); opacity: 0.8; }
 }
