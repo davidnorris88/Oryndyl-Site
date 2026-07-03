@@ -1,136 +1,118 @@
-const bg = document.getElementById("bg");
-const mid = document.getElementById("mid");
-const fg = document.getElementById("fg");
-const fx = document.getElementById("fx");
+const canvas = document.getElementById("scene");
+const ctx = canvas.getContext("2d");
 
-const b = bg.getContext("2d");
-const m = mid.getContext("2d");
-const f = fg.getContext("2d");
-const x = fx.getContext("2d");
-
-const word = document.getElementById("word");
 const core = document.getElementById("core");
+const word = document.getElementById("word");
 const runesOverlay = document.getElementById("runesOverlay");
 const camera = document.getElementById("camera");
 
 let w,h;
 function resize(){
-  w = bg.width = mid.width = fg.width = fx.width = innerWidth;
-  h = bg.height = mid.height = fg.height = fx.height = innerHeight;
+  w = canvas.width = innerWidth;
+  h = canvas.height = innerHeight;
 }
 window.addEventListener("resize", resize);
 resize();
 
-/* ---------------- STATE ---------------- */
-let start = performance.now();
-let hitPlayed = false;
-
-/* ---------------- GLYPHS ---------------- */
-const RUNES = ["ᚠ","ᚢ","ᚦ","ᚨ","ᚱ","ᚲ","ᚷ","ᚹ"];
-
-const glyphs = Array.from({length: 40}, () => ({
-  x: Math.random()*w,
-  y: Math.random()*h,
-  tx: w/2,
-  ty: h/2,
-  c: RUNES[Math.floor(Math.random()*RUNES.length)],
+/* ---------------- LEAD EMBER (MAIN ACTOR) ---------------- */
+let ember = {
+  x: w * 0.2,
+  y: h * 0.6,
+  vx: 2.2,
+  vy: -0.6,
+  r: 3,
   a: 0
-}));
+};
 
-/* ---------------- PARTICLES ---------------- */
-const particles = Array.from({length: 80}, () => ({
-  x: Math.random()*w,
-  y: Math.random()*h,
-  vx: (Math.random()-0.5)*0.3,
-  vy: -Math.random()*0.6,
-  a: Math.random()
-}));
+/* ---------------- TIMELINE STATE ---------------- */
+let state = "void";
+let start = performance.now();
+let ignited = false;
 
-/* ---------------- AUDIO (MINIMAL MIX) ---------------- */
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const master = audioCtx.createGain();
-master.gain.value = 0.8;
-master.connect(audioCtx.destination);
+/* ---------------- EASING ---------------- */
+const ease = t => t*t*(3-2*t);
 
-function hit(){
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type="sine";
-  o.frequency.setValueAtTime(180,audioCtx.currentTime);
-  g.gain.setValueAtTime(0.4,audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.5);
-  o.connect(g); g.connect(master);
-  o.start(); o.stop(audioCtx.currentTime+0.5);
+/* ---------------- STATE MACHINE ---------------- */
+function updateState(s){
+  if(s < 2) state = "void";
+  else if(s < 4) state = "travel";
+  else if(s < 6) state = "ignite";
+  else state = "reveal";
 }
 
-/* ---------------- UTILS ---------------- */
-const ease = t => t*t*(3-2*t);
+/* ---------------- CAMERA ---------------- */
+let shakeX = 0;
+let shakeY = 0;
 
 /* ---------------- LOOP ---------------- */
 function loop(t){
+
   const s = (t - start)/1000;
-  const e = Math.min(1, s/8);
-  const easeT = ease(e);
+  updateState(s);
 
-  /* CAMERA */
-  let shake = (s>3.9 && s<4.2) ? (Math.random()-0.5)*10 : 0;
-  camera.style.transform = `scale(${1 + easeT*0.12}) translate(${shake}px,${shake}px)`;
+  /* ---------------- CAMERA ---------------- */
+  const zoom = 1 + ease(Math.min(s/8,1)) * 0.12;
 
-  /* DOM FX */
-  core.style.opacity = Math.min(1, s/4);
-  runesOverlay.style.opacity = Math.max(0, (s-3)/3);
-  word.style.opacity = Math.max(0, (s-6)/2);
-
-  /* HIT */
-  if(s>4 && !hitPlayed){
-    hit(); hitPlayed=true;
+  if(state === "ignite"){
+    shakeX += (Math.random()-0.5)*12;
+    shakeY += (Math.random()-0.5)*12;
   }
 
-  /* CLEAR */
-  b.clearRect(0,0,w,h);
-  m.clearRect(0,0,w,h);
-  f.clearRect(0,0,w,h);
-  x.clearRect(0,0,w,h);
+  shakeX *= 0.85;
+  shakeY *= 0.85;
 
-  /* GLYPHS (MID LAYER) */
-  m.fillStyle="rgba(255,200,140,0.9)";
-  m.font="20px Georgia";
+  camera.style.transform =
+    `scale(${zoom}) translate(${shakeX}px,${shakeY}px)`;
 
-  glyphs.forEach(g=>{
-    if(s>2){
-      g.x += (g.tx-g.x)*0.02;
-      g.y += (g.ty-g.y)*0.02;
-      g.a = Math.min(1,g.a+0.01);
-    }
+  /* ---------------- CORE VISUAL ---------------- */
+  core.style.opacity =
+    state === "ignite" ? 1 :
+    state === "travel" ? 0.3 : 0;
 
-    if(s>6) g.a *= 0.97;
+  /* ---------------- RUNE FIELD ---------------- */
+  runesOverlay.style.opacity =
+    state === "ignite" ? 1 : 0;
 
-    m.globalAlpha = g.a;
-    m.fillText(g.c,g.x,g.y);
-  });
+  /* ---------------- WORDMARK ---------------- */
+  word.style.opacity =
+    state === "reveal"
+      ? Math.min(1, (s-6)/2)
+      : 0;
 
-  /* PARTICLES (FG LAYER) */
-  particles.forEach(p=>{
-    const heat = Math.sin(p.x*0.01+s)*Math.cos(p.y*0.01+s);
+  /* ---------------- EMBER LOGIC ---------------- */
+  if(state === "travel"){
+    ember.x += ember.vx;
+    ember.y += ember.vy;
+    ember.a = Math.min(1, ember.a + 0.02);
+  }
 
-    p.x += p.vx + heat*0.2;
-    p.y += p.vy + heat*0.2;
+  if(state === "ignite"){
+    ember.vx *= 0.9;
+    ember.vy *= 0.9;
+    ember.r += 0.9;
+    ember.a = 1;
+  }
 
-    if(p.y<0) p.y=h;
+  if(state === "reveal"){
+    ember.r *= 0.95;
+    ember.a *= 0.92;
+  }
 
-    const grd = f.createRadialGradient(p.x,p.y,0,p.x,p.y,10);
-    grd.addColorStop(0,"rgba(255,140,60,"+p.a+")");
-    grd.addColorStop(1,"transparent");
+  /* ---------------- DRAW ---------------- */
+  ctx.clearRect(0,0,w,h);
 
-    f.fillStyle=grd;
-    f.beginPath();
-    f.arc(p.x,p.y,3,0,Math.PI*2);
-    f.fill();
-  });
+  const glow = ctx.createRadialGradient(
+    ember.x, ember.y, 0,
+    ember.x, ember.y, ember.r * 12
+  );
 
-  /* FX PASS */
-  x.fillStyle="rgba(0,0,0,0.03)";
-  x.fillRect(0,0,w,h);
+  glow.addColorStop(0, `rgba(255,140,60,${ember.a})`);
+  glow.addColorStop(1, "transparent");
+
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(ember.x, ember.y, ember.r, 0, Math.PI*2);
+  ctx.fill();
 
   requestAnimationFrame(loop);
 }
