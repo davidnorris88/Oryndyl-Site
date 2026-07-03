@@ -1,101 +1,99 @@
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
-
-const emberEl = document.getElementById("ember");
-const brand = document.getElementById("brand");
+const ember = document.getElementById("ember");
+const flame = document.getElementById("flame");
+const logo = document.getElementById("logo");
+const fx = document.getElementById("fx");
+const ctx = fx.getContext("2d");
 
 let w,h;
 function resize(){
-  w = canvas.width = innerWidth;
-  h = canvas.height = innerHeight;
+  w = fx.width = innerWidth;
+  h = fx.height = innerHeight;
 }
 window.addEventListener("resize", resize);
 resize();
 
-/* ---------------- TIMELINE ---------------- */
 const start = performance.now();
 
-/* ember state (single actor only) */
-const ember = {
-  x: w/2,
-  y: h/2 + 40,
-  glow: 0,
-  heat: 0
-};
-
-/* easing */
+/* easing for cinematic motion */
 const ease = t => t*t*(3-2*t);
 
-/* ---------------- LOOP ---------------- */
+/* ember physics (minimal, intentional) */
+let ex = 0.2 * window.innerWidth;
+let ey = 0.5 * window.innerHeight;
+
 function loop(t){
 
   const s = (t - start)/1000;
-  const e = Math.min(1, s/8);
-  const easeT = ease(e);
 
-  /* CAMERA FEEL (subtle drift, not shake-heavy) */
-  const driftX = Math.sin(s * 0.6) * 2;
-  const driftY = Math.cos(s * 0.5) * 1.5;
-
-  canvas.style.transform =
-    `scale(${1 + easeT * 0.06}) translate(${driftX}px, ${driftY}px)`;
-
-  /* ---------------- PHASES ---------------- */
-
-  // 0–2s VOID
-  if(s < 2){
-    ember.glow = 0;
-    ember.heat = 0;
-    emberEl.style.opacity = 0;
-    brand.style.opacity = 0;
-  }
-
-  // 2–4s EMBER AWAKENING (NO MOVEMENT, ONLY BREATHING)
-  if(s >= 2 && s < 4){
-    const t = (s-2)/2;
-
-    ember.glow = t;
-    ember.heat = t * 0.3;
-
-    emberEl.style.opacity = t;
-    emberEl.style.transform =
-      `translate(-50%, -50%) scale(${1 + t*1.2})`;
-  }
-
-  // 4–6s IGNITION (FORGE MOMENT)
-  if(s >= 4 && s < 6){
-    const t = (s-4)/2;
-
-    ember.glow = 1;
-    ember.heat = 1;
-
-    emberEl.style.opacity = 1;
-    emberEl.style.transform =
-      `translate(-50%, -50%) scale(${2 + t*3})`;
-
-    // subtle energy bloom
-    ctx.fillStyle = `rgba(255,120,40,${0.08 - t*0.06})`;
-    ctx.fillRect(0,0,w,h);
-  }
-
-  // 6–8s REVEAL (FORMATION, NOT FADE-IN)
-  if(s >= 6 && s < 8){
-    const t = (s-6)/2;
-
-    emberEl.style.opacity = 1 - t;
-    brand.style.opacity = t;
-
-    brand.style.letterSpacing = `${16 - t*6}px`;
-  }
-
-  // 8–10s SETTLE (AFTERIMAGE)
-  if(s >= 8){
-    brand.style.opacity = 1;
-  }
-
-  /* subtle forge haze */
-  ctx.fillStyle = "rgba(0,0,0,0.05)";
+  /* clear subtle fog trail */
+  ctx.fillStyle = "rgba(0,0,0,0.08)";
   ctx.fillRect(0,0,w,h);
+
+  /* ------------------- 0–2s VOID ------------------- */
+  if(s < 2){
+    ember.style.opacity = 0;
+    flame.style.opacity = 0;
+    logo.style.opacity = 0;
+  }
+
+  /* ------------------- 2–4s EMBER ARRIVAL ------------------- */
+  if(s >= 2 && s < 4){
+
+    const t2 = ease((s-2)/2);
+
+    ember.style.opacity = 1;
+    ex += (w*0.5 - ex) * 0.02;
+    ey += (h*0.5 - ey) * 0.01;
+
+    ember.style.left = ex + "px";
+    ember.style.top = ey + "px";
+
+    ember.style.transform = `scale(${0.5 + t2*2})`;
+  }
+
+  /* ------------------- 4–5.5s IGNITION ------------------- */
+  if(s >= 4 && s < 5.5){
+
+    const t3 = (s-4)/1.5;
+
+    flame.style.opacity = t3;
+    flame.style.transform = `translate(-50%,-50%) scale(${1 + t3*2.5})`;
+
+    ember.style.opacity = 1 - t3*0.7;
+
+    /* spark burst */
+    for(let i=0;i<3;i++){
+      ctx.fillStyle = `rgba(255,140,60,${0.08})`;
+      ctx.beginPath();
+      ctx.arc(
+        ex + (Math.random()-0.5)*30,
+        ey + (Math.random()-0.5)*30,
+        Math.random()*2,
+        0,Math.PI*2
+      );
+      ctx.fill();
+    }
+  }
+
+  /* ------------------- 5.5–7.5s FLAME REVEAL ------------------- */
+  if(s >= 5.5 && s < 7.5){
+
+    const t4 = ease((s-5.5)/2);
+
+    flame.style.opacity = 1;
+    logo.style.opacity = t4;
+
+    flame.style.filter = `blur(${18 - t4*10}px)`;
+
+    logo.style.letterSpacing = `${18 - t4*6}px`;
+  }
+
+  /* ------------------- 7.5–10s SETTLE ------------------- */
+  if(s >= 7.5){
+
+    logo.style.opacity = 1;
+    flame.style.opacity = 0.8;
+  }
 
   requestAnimationFrame(loop);
 }
