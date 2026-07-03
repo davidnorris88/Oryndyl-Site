@@ -1,5 +1,7 @@
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
@@ -7,83 +9,153 @@ html {
 }
 
 body {
-  margin: 0;
-  font-family: Georgia, serif;
-  color: #f4d2a1;
-  background: #050403;
+  background: #050505;
+  color: #f2e7d3;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.6;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  padding: 0 6vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(5, 5, 5, 0.82);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 180, 90, 0.12);
+  z-index: 10;
+}
+
+.logo {
+  letter-spacing: 0.22em;
+  color: #f4b15f;
+  font-size: 0.95rem;
+}
+
+nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav a {
+  color: #bfa98c;
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+
+nav a:hover {
+  color: #f4b15f;
 }
 
 .hero {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
+  padding: 8rem 6vw 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
   background:
-    radial-gradient(circle at center, rgba(255, 115, 35, 0.16), transparent 28%),
-    radial-gradient(circle at center, #14100c 0%, #050403 62%, #000 100%);
+    radial-gradient(circle at center, rgba(255, 122, 32, 0.13), transparent 34%),
+    linear-gradient(to bottom, #020202, #100804 60%, #050505);
 }
 
-.glow {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 130, 45, 0.28), transparent 70%);
-  filter: blur(18px);
-  animation: pulse 5s ease-in-out infinite;
+.hero-inner {
+  max-width: 920px;
 }
 
-.hero h1,
-.hero p,
-.button {
-  position: relative;
-  z-index: 2;
+.eyebrow {
+  color: #d89b55;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.78rem;
+  margin-bottom: 1.3rem;
 }
 
 h1 {
-  margin: 0;
-  font-size: clamp(3rem, 9vw, 7rem);
+  font-size: clamp(3.4rem, 12vw, 9rem);
+  font-weight: 400;
   letter-spacing: 0.18em;
-  text-shadow: 0 0 24px rgba(255, 110, 35, 0.35);
+  color: #f7ead2;
+  text-shadow: 0 0 40px rgba(255, 128, 32, 0.22);
 }
 
-.hero p {
-  max-width: 620px;
-  margin: 1.5rem auto 2rem;
-  font-size: 1.2rem;
-  color: #d7b98c;
+.tagline {
+  max-width: 680px;
+  margin: 1.4rem auto 0;
+  color: #c9b59a;
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
 }
 
 .button {
   display: inline-block;
-  padding: 0.85rem 1.4rem;
-  color: #f4d2a1;
+  margin-top: 2.6rem;
+  padding: 0.9rem 1.5rem;
+  border: 1px solid rgba(244, 177, 95, 0.5);
+  color: #f4c98e;
   text-decoration: none;
-  border: 1px solid rgba(244, 210, 161, 0.45);
-  background: rgba(255, 120, 40, 0.08);
+  letter-spacing: 0.12em;
+  font-size: 0.82rem;
+  text-transform: uppercase;
 }
 
-.about {
-  padding: 5rem 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-  line-height: 1.7;
+.button:hover {
+  background: rgba(244, 177, 95, 0.1);
 }
 
-.about h2 {
-  font-size: 2rem;
+.section {
+  padding: 7rem 6vw;
+  max-width: 900px;
+  margin: auto;
+  text-align: center;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.45;
-    transform: scale(0.92);
+.section h2 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 400;
+  color: #f4d2a1;
+  margin-bottom: 1.5rem;
+}
+
+.section p {
+  color: #bfae96;
+  font-size: 1.08rem;
+}
+
+.split {
+  max-width: none;
+  background:
+    linear-gradient(to bottom, #050505, #0e0905, #050505);
+}
+
+.split div {
+  max-width: 900px;
+  margin: auto;
+}
+
+.final {
+  border-top: 1px solid rgba(255, 180, 90, 0.08);
+}
+
+@media (max-width: 700px) {
+  .site-header {
+    padding: 0 1.2rem;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
+
+  nav {
+    gap: 0.8rem;
+  }
+
+  nav a {
+    font-size: 0.72rem;
+  }
+
+  h1 {
+    letter-spacing: 0.1em;
   }
 }
