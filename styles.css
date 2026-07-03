@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(circle at center, #0a0908, #000);
+  background: #000;
   font-family: Georgia, serif;
 }
 
@@ -13,41 +13,57 @@ html, body {
   overflow: hidden;
 }
 
-/* CANVAS (subtle atmosphere only) */
-#c {
+/* subtle FX canvas */
+#fx {
   position: absolute;
   inset: 0;
 }
 
-/* SINGLE EMBER */
+/* EMBER (single source) */
 #ember {
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 18px;
-  height: 18px;
-  transform: translate(-50%, -50%);
+  left: 20%;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(255,160,80,1) 0%,
-    rgba(255,90,30,0.6) 40%,
+    rgba(255,180,90,1),
+    rgba(255,80,20,0.4),
     transparent 70%
   );
-  filter: blur(2px);
+  filter: blur(1px);
   opacity: 0;
 }
 
-/* BRAND REVEAL */
-#brand {
+/* FLAME BURST */
+#flame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle,
+    rgba(255,140,60,0.35),
+    rgba(255,60,10,0.15),
+    transparent 70%
+  );
+  filter: blur(18px);
+  opacity: 0;
+}
+
+/* LOGO REVEAL */
+#logo {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 64px;
-  letter-spacing: 16px;
-  color: rgba(255, 200, 160, 0.92);
+  font-size: 70px;
+  letter-spacing: 18px;
+  color: rgba(255, 210, 170, 0.95);
   opacity: 0;
   text-shadow:
-    0 0 20px rgba(255,120,40,0.25),
-    0 0 40px rgba(255,80,20,0.15);
+    0 0 25px rgba(255,120,40,0.25),
+    0 0 60px rgba(255,80,20,0.15);
 }
