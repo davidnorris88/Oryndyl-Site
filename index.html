@@ -11,138 +11,202 @@
     height: 100%;
     overflow: hidden;
     background: radial-gradient(circle at center, #0b0a0f 0%, #050409 60%, #000 100%);
-    font-family: "Georgia", serif;
+    font-family: Georgia, serif;
   }
 
   canvas {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
   }
 
-  .center-glow {
+  /* central ignition core */
+  .core {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(255,140,60,0.35), transparent 70%);
-    filter: blur(8px);
+    background: radial-gradient(circle,
+      rgba(255,140,60,0.0) 0%,
+      rgba(255,120,40,0.15) 35%,
+      rgba(255,80,20,0.0) 70%
+    );
+    filter: blur(10px);
     opacity: 0;
-    animation: glowPulse 8s ease-in-out infinite;
   }
 
-  @keyframes glowPulse {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
-    30% { opacity: 0.6; }
-    60% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.4); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(2); }
-  }
-
+  /* wordmark */
   .wordmark {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: rgba(255, 190, 120, 0.85);
     font-size: 64px;
-    letter-spacing: 12px;
+    letter-spacing: 14px;
+    color: rgba(255, 200, 140, 0.9);
     opacity: 0;
     text-shadow:
-      0 0 10px rgba(255,120,40,0.4),
-      0 0 25px rgba(255,80,20,0.25);
-    animation: reveal 8s ease-in-out infinite;
+      0 0 12px rgba(255,120,40,0.35),
+      0 0 30px rgba(255,70,20,0.25);
   }
 
-  @keyframes reveal {
-    0% { opacity: 0; filter: blur(8px); transform: translate(-50%, -50%) scale(0.95); }
-    40% { opacity: 0; }
-    60% { opacity: 0.3; }
-    80% { opacity: 1; filter: blur(0px); transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0; }
-  }
-
-  /* subtle rune shimmer overlay */
-  .rune-overlay {
+  /* rune shimmer field */
+  .runes {
     position: absolute;
     inset: 0;
     background: repeating-linear-gradient(
-      120deg,
-      rgba(255, 140, 60, 0.03) 0px,
-      rgba(255, 140, 60, 0.03) 1px,
+      115deg,
+      rgba(255,140,60,0.04) 0px,
+      rgba(255,140,60,0.04) 1px,
       transparent 2px,
-      transparent 6px
+      transparent 8px
     );
+    opacity: 0;
     mix-blend-mode: overlay;
-    opacity: 0.25;
-    pointer-events: none;
   }
 </style>
 </head>
 
 <body>
-<canvas id="embers"></canvas>
-<div class="center-glow"></div>
-<div class="wordmark">ORYNDYL</div>
-<div class="rune-overlay"></div>
+
+<canvas id="c"></canvas>
+<div class="core" id="core"></div>
+<div class="wordmark" id="word">ORYNDYL</div>
+<div class="runes" id="runes"></div>
 
 <script>
-const canvas = document.getElementById("embers");
+const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
 let w, h;
-function resize() {
+function resize(){
   w = canvas.width = window.innerWidth;
   h = canvas.height = window.innerHeight;
 }
 window.addEventListener("resize", resize);
 resize();
 
-const emberCount = 90;
-const embers = [];
+/* ---------------------------
+   EMBER SYSTEM
+----------------------------*/
+let embers = [];
+let intensity = 0; // grows during ignition
 
-for (let i = 0; i < emberCount; i++) {
-  embers.push({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    r: Math.random() * 2.2 + 0.3,
-    vx: (Math.random() - 0.5) * 0.3,
-    vy: -Math.random() * 0.6 - 0.2,
-    alpha: Math.random()
-  });
+function spawnEmber(boost=false){
+  return {
+    x: Math.random()*w,
+    y: h + Math.random()*50,
+    r: Math.random()*2.2 + 0.3,
+    vx: (Math.random()-0.5)*(boost?1.2:0.3),
+    vy: -(Math.random()* (boost?2.2:0.6) + (boost?1.2:0.2)),
+    a: Math.random()*0.8 + 0.2
+  };
 }
 
-function drawEmbers() {
-  ctx.clearRect(0, 0, w, h);
+// initial low embers
+for(let i=0;i<60;i++) embers.push(spawnEmber(false));
 
-  for (let e of embers) {
-    e.x += e.vx;
-    e.y += e.vy;
+/* ---------------------------
+   TIMELINE (0–10s)
+----------------------------*/
+const start = performance.now();
 
-    if (e.y < 0) {
-      e.y = h + Math.random() * 50;
-      e.x = Math.random() * w;
+const core = document.getElementById("core");
+const word = document.getElementById("word");
+const runes = document.getElementById("runes");
+
+function timeline(t){
+  const s = t/1000;
+
+  // 0–2s: silence + faint ash
+  if(s < 2){
+    intensity = 0.2;
+    core.style.opacity = 0;
+  }
+
+  // 2–4s: ignition begins
+  if(s >= 2 && s < 4){
+    intensity = 0.6;
+    core.style.opacity = (s-2)/2;
+  }
+
+  // 4–6s: burst ignition
+  if(s >= 4 && s < 6){
+    intensity = 1.8;
+    core.style.opacity = 1;
+    runes.style.opacity = (s-4)/2;
+
+    // burst embers
+    for(let i=0;i<6;i++) embers.push(spawnEmber(true));
+  }
+
+  // 6–8s: formation of wordmark
+  if(s >= 6 && s < 8){
+    intensity = 1.0;
+    word.style.opacity = (s-6)/2;
+    core.style.opacity = 0.8;
+  }
+
+  // 8–10s: resolution fade
+  if(s >= 8){
+    intensity = 0.3;
+    word.style.opacity = 1 - (s-8)/2;
+    core.style.opacity = 0.4;
+    runes.style.opacity = 0.6 - (s-8)/2;
+  }
+}
+
+/* ---------------------------
+   ANIMATION LOOP (no visual looping)
+----------------------------*/
+function draw(now){
+  const elapsed = now - start;
+  const s = elapsed/1000;
+
+  timeline(elapsed);
+
+  ctx.clearRect(0,0,w,h);
+
+  // soften background glow
+  ctx.fillStyle = "rgba(0,0,0,0.08)";
+  ctx.fillRect(0,0,w,h);
+
+  for(let i=embers.length-1;i>=0;i--){
+    const e = embers[i];
+
+    e.x += e.vx * intensity;
+    e.y += e.vy * intensity;
+
+    // fade over time
+    e.a *= 0.995;
+
+    if(e.y < -20 || e.a < 0.02){
+      embers.splice(i,1);
+      continue;
     }
 
-    if (e.x < 0 || e.x > w) {
-      e.x = Math.random() * w;
-    }
+    const g = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r*6);
+    g.addColorStop(0, `rgba(255,140,60,${e.a})`);
+    g.addColorStop(1, "rgba(255,70,20,0)");
 
-    const gradient = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 4);
-    gradient.addColorStop(0, `rgba(255,140,60,${e.alpha})`);
-    gradient.addColorStop(1, "rgba(255,80,20,0)");
-
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.arc(e.x, e.y, e.r * 3, 0, Math.PI * 2);
+    ctx.arc(e.x,e.y,e.r*3,0,Math.PI*2);
     ctx.fill();
   }
 
-  requestAnimationFrame(drawEmbers);
+  if(s < 10){
+    requestAnimationFrame(draw);
+  } else {
+    // final still frame (no loop)
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.fillRect(0,0,w,h);
+  }
 }
 
-drawEmbers();
+requestAnimationFrame(draw);
 </script>
+
 </body>
 </html>
