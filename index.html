@@ -4,209 +4,27 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ORYNDYL</title>
-
-<style>
-  html, body {
-    margin: 0;
-    height: 100%;
-    overflow: hidden;
-    background: radial-gradient(circle at center, #0b0a0f 0%, #050409 60%, #000 100%);
-    font-family: Georgia, serif;
-  }
-
-  canvas {
-    position: absolute;
-    inset: 0;
-  }
-
-  /* central ignition core */
-  .core {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 140px;
-    height: 140px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle,
-      rgba(255,140,60,0.0) 0%,
-      rgba(255,120,40,0.15) 35%,
-      rgba(255,80,20,0.0) 70%
-    );
-    filter: blur(10px);
-    opacity: 0;
-  }
-
-  /* wordmark */
-  .wordmark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 64px;
-    letter-spacing: 14px;
-    color: rgba(255, 200, 140, 0.9);
-    opacity: 0;
-    text-shadow:
-      0 0 12px rgba(255,120,40,0.35),
-      0 0 30px rgba(255,70,20,0.25);
-  }
-
-  /* rune shimmer field */
-  .runes {
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      115deg,
-      rgba(255,140,60,0.04) 0px,
-      rgba(255,140,60,0.04) 1px,
-      transparent 2px,
-      transparent 8px
-    );
-    opacity: 0;
-    mix-blend-mode: overlay;
-  }
-</style>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 
 <body>
 
-<canvas id="c"></canvas>
-<div class="core" id="core"></div>
-<div class="wordmark" id="word">ORYNDYL</div>
-<div class="runes" id="runes"></div>
+<div id="camera">
 
-<script>
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
+  <!-- LAYERS -->
+  <canvas id="bg"></canvas>
+  <canvas id="mid"></canvas>
+  <canvas id="fg"></canvas>
+  <canvas id="fx"></canvas>
 
-let w, h;
-function resize(){
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-}
-window.addEventListener("resize", resize);
-resize();
+  <!-- CORE ELEMENTS -->
+  <div id="core"></div>
+  <div id="word">ORYNDYL</div>
+  <div id="runesOverlay"></div>
 
-/* ---------------------------
-   EMBER SYSTEM
-----------------------------*/
-let embers = [];
-let intensity = 0; // grows during ignition
+</div>
 
-function spawnEmber(boost=false){
-  return {
-    x: Math.random()*w,
-    y: h + Math.random()*50,
-    r: Math.random()*2.2 + 0.3,
-    vx: (Math.random()-0.5)*(boost?1.2:0.3),
-    vy: -(Math.random()* (boost?2.2:0.6) + (boost?1.2:0.2)),
-    a: Math.random()*0.8 + 0.2
-  };
-}
-
-// initial low embers
-for(let i=0;i<60;i++) embers.push(spawnEmber(false));
-
-/* ---------------------------
-   TIMELINE (0–10s)
-----------------------------*/
-const start = performance.now();
-
-const core = document.getElementById("core");
-const word = document.getElementById("word");
-const runes = document.getElementById("runes");
-
-function timeline(t){
-  const s = t/1000;
-
-  // 0–2s: silence + faint ash
-  if(s < 2){
-    intensity = 0.2;
-    core.style.opacity = 0;
-  }
-
-  // 2–4s: ignition begins
-  if(s >= 2 && s < 4){
-    intensity = 0.6;
-    core.style.opacity = (s-2)/2;
-  }
-
-  // 4–6s: burst ignition
-  if(s >= 4 && s < 6){
-    intensity = 1.8;
-    core.style.opacity = 1;
-    runes.style.opacity = (s-4)/2;
-
-    // burst embers
-    for(let i=0;i<6;i++) embers.push(spawnEmber(true));
-  }
-
-  // 6–8s: formation of wordmark
-  if(s >= 6 && s < 8){
-    intensity = 1.0;
-    word.style.opacity = (s-6)/2;
-    core.style.opacity = 0.8;
-  }
-
-  // 8–10s: resolution fade
-  if(s >= 8){
-    intensity = 0.3;
-    word.style.opacity = 1 - (s-8)/2;
-    core.style.opacity = 0.4;
-    runes.style.opacity = 0.6 - (s-8)/2;
-  }
-}
-
-/* ---------------------------
-   ANIMATION LOOP (no visual looping)
-----------------------------*/
-function draw(now){
-  const elapsed = now - start;
-  const s = elapsed/1000;
-
-  timeline(elapsed);
-
-  ctx.clearRect(0,0,w,h);
-
-  // soften background glow
-  ctx.fillStyle = "rgba(0,0,0,0.08)";
-  ctx.fillRect(0,0,w,h);
-
-  for(let i=embers.length-1;i>=0;i--){
-    const e = embers[i];
-
-    e.x += e.vx * intensity;
-    e.y += e.vy * intensity;
-
-    // fade over time
-    e.a *= 0.995;
-
-    if(e.y < -20 || e.a < 0.02){
-      embers.splice(i,1);
-      continue;
-    }
-
-    const g = ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.r*6);
-    g.addColorStop(0, `rgba(255,140,60,${e.a})`);
-    g.addColorStop(1, "rgba(255,70,20,0)");
-
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(e.x,e.y,e.r*3,0,Math.PI*2);
-    ctx.fill();
-  }
-
-  if(s < 10){
-    requestAnimationFrame(draw);
-  } else {
-    // final still frame (no loop)
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
-    ctx.fillRect(0,0,w,h);
-  }
-}
-
-requestAnimationFrame(draw);
-</script>
+<script src="main.js"></script>
 
 </body>
 </html>
