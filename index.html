@@ -1,59 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oryndyl</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ORYNDYL</title>
+
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #0b0a0f 0%, #050409 60%, #000 100%);
+    font-family: "Georgia", serif;
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .center-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,140,60,0.35), transparent 70%);
+    filter: blur(8px);
+    opacity: 0;
+    animation: glowPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    30% { opacity: 0.6; }
+    60% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.4); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+  }
+
+  .wordmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 190, 120, 0.85);
+    font-size: 64px;
+    letter-spacing: 12px;
+    opacity: 0;
+    text-shadow:
+      0 0 10px rgba(255,120,40,0.4),
+      0 0 25px rgba(255,80,20,0.25);
+    animation: reveal 8s ease-in-out infinite;
+  }
+
+  @keyframes reveal {
+    0% { opacity: 0; filter: blur(8px); transform: translate(-50%, -50%) scale(0.95); }
+    40% { opacity: 0; }
+    60% { opacity: 0.3; }
+    80% { opacity: 1; filter: blur(0px); transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; }
+  }
+
+  /* subtle rune shimmer overlay */
+  .rune-overlay {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      120deg,
+      rgba(255, 140, 60, 0.03) 0px,
+      rgba(255, 140, 60, 0.03) 1px,
+      transparent 2px,
+      transparent 6px
+    );
+    mix-blend-mode: overlay;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+</style>
 </head>
 
 <body>
-  <div class="background"></div>
-  <div class="embers">
-  <span></span><span></span><span></span><span></span><span></span>
-  <span></span><span></span><span></span><span></span><span></span>
-  </div>
-  <div class="overlay"></div>
+<canvas id="embers"></canvas>
+<div class="center-glow"></div>
+<div class="wordmark">ORYNDYL</div>
+<div class="rune-overlay"></div>
 
-  <main class="hero">
-    <div class="glow"></div>
+<script>
+const canvas = document.getElementById("embers");
+const ctx = canvas.getContext("2d");
 
-    <h1 class="title">ORYNDYL</h1>
+let w, h;
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
 
-    <p class="tagline">Stories Forged in Shadow. Ignited by Wonder.</p>
+const emberCount = 90;
+const embers = [];
 
-    <p class="subtitle">
-      A cinematic storytelling studio creating immersive short films and original worlds inspired by mystery, fantasy, horror, and the unknown.
-    </p>
+for (let i = 0; i < emberCount; i++) {
+  embers.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 2.2 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: -Math.random() * 0.6 - 0.2,
+    alpha: Math.random()
+  });
+}
 
-    <div class="buttons">
-      <a href="#" class="btn primary">Watch on YouTube</a>
-      <a href="#" class="btn secondary">Follow the Journey</a>
-    </div>
-  </main>
+function drawEmbers() {
+  ctx.clearRect(0, 0, w, h);
 
-  <section class="content">
-    <div class="card">
-      <h3>Cinematic Shorts</h3>
-      <p>Short-form stories designed to captivate in under a minute.</p>
-    </div>
+  for (let e of embers) {
+    e.x += e.vx;
+    e.y += e.vy;
 
-    <div class="card">
-      <h3>Dark Mysteries</h3>
-      <p>Legends, folklore, unexplained phenomena, and eerie tales.</p>
-    </div>
+    if (e.y < 0) {
+      e.y = h + Math.random() * 50;
+      e.x = Math.random() * w;
+    }
 
-    <div class="card">
-      <h3>Original Worlds</h3>
-      <p>Rich fictional universes filled with mystery and adventure.</p>
-    </div>
-  </section>
+    if (e.x < 0 || e.x > w) {
+      e.x = Math.random() * w;
+    }
 
-  <footer>
-    <p>ORYNDYL — Forged with Imagination</p>
-    <p>© 2026 Oryndyl</p>
-  </footer>
+    const gradient = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 4);
+    gradient.addColorStop(0, `rgba(255,140,60,${e.alpha})`);
+    gradient.addColorStop(1, "rgba(255,80,20,0)");
 
-  <script src="script.js"></script>
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.r * 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(drawEmbers);
+}
+
+drawEmbers();
+</script>
 </body>
 </html>
