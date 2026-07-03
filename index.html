@@ -1,179 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORYNDYL Timeline</title>
-    <style>
-        /* Import a cinematic, clean font */
-        @import url('https://googleapis.com');
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: #050505;
-            color: #a0a0a0;
-            font-family: 'Inter', sans-serif;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* Timeline Main Wrapper */
-        .timeline-container {
-            width: 100%;
-            max-width: 1200px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Individual Timeline Row */
-        .timeline-row {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            min-height: 180px;
-        }
-
-        /* Text Column (Left Side) */
-        .text-column {
-            padding: 25px 20px 25px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .time-stamp {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: 400;
-        }
-
-        .title {
-            font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-            color: #d4d4d4;
-            text-transform: uppercase;
-        }
-
-        .description {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #888;
-        }
-
-        /* Visual Media Column (Right Side) */
-        .visual-column {
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Empty placeholder look for step 1 */
-        .void-bg {
-            background: radial-gradient(circle, #0a0a0a 0%, #000000 100%);
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Responsive images fitting perfectly in the row */
-        .visual-column img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        /* Small screen adjustments */
-        @media (max-width: 768px) {
-            .timeline-row {
-                grid-template-columns: 1fr;
-            }
-            .text-column {
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                padding: 20px 0;
-            }
-            .visual-column {
-                height: 200px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ORYNDYL</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-    <div class="timeline-container">
+  <main class="hero">
+    <div class="glow"></div>
 
-        <!-- Row 1 -->
-        <div class="timeline-row">
-            <div class="text-column">
-                <div class="time-stamp">1. 0:00 - 1:50</div>
-                <div class="title">Black Void</div>
-                <div class="description">Silence. Nothing.<br>Awaiting.</div>
-            </div>
-            <div class="visual-column">
-                <div class="void-bg"></div>
-            </div>
-        </div>
+    <h1>ORYNDYL</h1>
+    <p>Stories forged from ember, shadow, and wonder.</p>
 
-        <!-- Row 2 -->
-        <div class="timeline-row">
-            <div class="text-column">
-                <div class="time-stamp">2. 1:50 - 3:50</div>
-                <div class="title">Ember Arrives</div>
-                <div class="description">A single ember drifts into the void.<br>Faint. Alive.</div>
-            </div>
-            <div class="visual-column">
-                <img src="ember.jpg" alt="Ember Arrives">
-            </div>
-        </div>
+    <a href="#about" class="button">Enter</a>
+  </main>
 
-        <!-- Row 3 -->
-        <div class="timeline-row">
-            <div class="text-column">
-                <div class="time-stamp">3. 3:50 - 5:50</div>
-                <div class="title">Sparks & Ignition</div>
-                <div class="description">The ember flares.<br>Sparks scatter.<br>Energy builds.</div>
-            </div>
-            <div class="visual-column">
-                <img src="sparks.jpg" alt="Sparks and Ignition">
-            </div>
-        </div>
+  <section id="about" class="about">
+    <h2>About Oryndyl</h2>
+    <p>
+      Oryndyl is a cinematic creative brand built around dark fantasy,
+      atmospheric storytelling, and visually rich digital content.
+    </p>
+  </section>
 
-        <!-- Row 4 -->
-        <div class="timeline-row">
-            <div class="text-column">
-                <div class="time-stamp">4. 5:50 - 8:00</div>
-                <div class="title">Flame Reveals</div>
-                <div class="description">Flames arc and swirl, carving the symbol from the dark.</div>
-            </div>
-            <div class="visual-column">
-                <img src="flame-reveal.jpg" alt="Flame Reveals">
-            </div>
-        </div>
-
-        <!-- Row 5 -->
-        <div class="timeline-row">
-            <div class="text-column">
-                <div class="time-stamp">5. 8:00 - 10:00</div>
-                <div class="title">Oryndyl</div>
-                <div class="description">The logo stands forged in fire.<br>The flame subsides.<br>The mark remains.</div>
-            </div>
-            <div class="visual-column">
-                <img src="oryndyl-final.jpg" alt="Oryndyl Logo">
-            </div>
-        </div>
-
-    </div>
-
+  <script src="script.js"></script>
 </body>
 </html>
