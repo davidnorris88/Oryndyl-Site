@@ -1,10 +1,8 @@
-const canvas = document.getElementById("scene");
+const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
-const core = document.getElementById("core");
-const word = document.getElementById("word");
-const runesOverlay = document.getElementById("runesOverlay");
-const camera = document.getElementById("camera");
+const emberEl = document.getElementById("ember");
+const brand = document.getElementById("brand");
 
 let w,h;
 function resize(){
@@ -14,105 +12,90 @@ function resize(){
 window.addEventListener("resize", resize);
 resize();
 
-/* ---------------- LEAD EMBER (MAIN ACTOR) ---------------- */
-let ember = {
-  x: w * 0.2,
-  y: h * 0.6,
-  vx: 2.2,
-  vy: -0.6,
-  r: 3,
-  a: 0
+/* ---------------- TIMELINE ---------------- */
+const start = performance.now();
+
+/* ember state (single actor only) */
+const ember = {
+  x: w/2,
+  y: h/2 + 40,
+  glow: 0,
+  heat: 0
 };
 
-/* ---------------- TIMELINE STATE ---------------- */
-let state = "void";
-let start = performance.now();
-let ignited = false;
-
-/* ---------------- EASING ---------------- */
+/* easing */
 const ease = t => t*t*(3-2*t);
-
-/* ---------------- STATE MACHINE ---------------- */
-function updateState(s){
-  if(s < 2) state = "void";
-  else if(s < 4) state = "travel";
-  else if(s < 6) state = "ignite";
-  else state = "reveal";
-}
-
-/* ---------------- CAMERA ---------------- */
-let shakeX = 0;
-let shakeY = 0;
 
 /* ---------------- LOOP ---------------- */
 function loop(t){
 
   const s = (t - start)/1000;
-  updateState(s);
+  const e = Math.min(1, s/8);
+  const easeT = ease(e);
 
-  /* ---------------- CAMERA ---------------- */
-  const zoom = 1 + ease(Math.min(s/8,1)) * 0.12;
+  /* CAMERA FEEL (subtle drift, not shake-heavy) */
+  const driftX = Math.sin(s * 0.6) * 2;
+  const driftY = Math.cos(s * 0.5) * 1.5;
 
-  if(state === "ignite"){
-    shakeX += (Math.random()-0.5)*12;
-    shakeY += (Math.random()-0.5)*12;
+  canvas.style.transform =
+    `scale(${1 + easeT * 0.06}) translate(${driftX}px, ${driftY}px)`;
+
+  /* ---------------- PHASES ---------------- */
+
+  // 0–2s VOID
+  if(s < 2){
+    ember.glow = 0;
+    ember.heat = 0;
+    emberEl.style.opacity = 0;
+    brand.style.opacity = 0;
   }
 
-  shakeX *= 0.85;
-  shakeY *= 0.85;
+  // 2–4s EMBER AWAKENING (NO MOVEMENT, ONLY BREATHING)
+  if(s >= 2 && s < 4){
+    const t = (s-2)/2;
 
-  camera.style.transform =
-    `scale(${zoom}) translate(${shakeX}px,${shakeY}px)`;
+    ember.glow = t;
+    ember.heat = t * 0.3;
 
-  /* ---------------- CORE VISUAL ---------------- */
-  core.style.opacity =
-    state === "ignite" ? 1 :
-    state === "travel" ? 0.3 : 0;
-
-  /* ---------------- RUNE FIELD ---------------- */
-  runesOverlay.style.opacity =
-    state === "ignite" ? 1 : 0;
-
-  /* ---------------- WORDMARK ---------------- */
-  word.style.opacity =
-    state === "reveal"
-      ? Math.min(1, (s-6)/2)
-      : 0;
-
-  /* ---------------- EMBER LOGIC ---------------- */
-  if(state === "travel"){
-    ember.x += ember.vx;
-    ember.y += ember.vy;
-    ember.a = Math.min(1, ember.a + 0.02);
+    emberEl.style.opacity = t;
+    emberEl.style.transform =
+      `translate(-50%, -50%) scale(${1 + t*1.2})`;
   }
 
-  if(state === "ignite"){
-    ember.vx *= 0.9;
-    ember.vy *= 0.9;
-    ember.r += 0.9;
-    ember.a = 1;
+  // 4–6s IGNITION (FORGE MOMENT)
+  if(s >= 4 && s < 6){
+    const t = (s-4)/2;
+
+    ember.glow = 1;
+    ember.heat = 1;
+
+    emberEl.style.opacity = 1;
+    emberEl.style.transform =
+      `translate(-50%, -50%) scale(${2 + t*3})`;
+
+    // subtle energy bloom
+    ctx.fillStyle = `rgba(255,120,40,${0.08 - t*0.06})`;
+    ctx.fillRect(0,0,w,h);
   }
 
-  if(state === "reveal"){
-    ember.r *= 0.95;
-    ember.a *= 0.92;
+  // 6–8s REVEAL (FORMATION, NOT FADE-IN)
+  if(s >= 6 && s < 8){
+    const t = (s-6)/2;
+
+    emberEl.style.opacity = 1 - t;
+    brand.style.opacity = t;
+
+    brand.style.letterSpacing = `${16 - t*6}px`;
   }
 
-  /* ---------------- DRAW ---------------- */
-  ctx.clearRect(0,0,w,h);
+  // 8–10s SETTLE (AFTERIMAGE)
+  if(s >= 8){
+    brand.style.opacity = 1;
+  }
 
-  const glow = ctx.createRadialGradient(
-    ember.x, ember.y, 0,
-    ember.x, ember.y, ember.r * 12
-  );
-
-  glow.addColorStop(0, `rgba(255,140,60,${ember.a})`);
-  glow.addColorStop(1, "transparent");
-
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(ember.x, ember.y, ember.r, 0, Math.PI*2);
-  ctx.fill();
+  /* subtle forge haze */
+  ctx.fillStyle = "rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,w,h);
 
   requestAnimationFrame(loop);
 }
