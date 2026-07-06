@@ -1,53 +1,67 @@
 <svg width="512" height="640" viewBox="0 0 512 640" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="640" fill="none"/>
+  <title>ORYNDYL Master Symbol v0.1</title>
 
-  <!-- outer emblem -->
-  <path
-    d="M256 72
-       L304 154
-       C389 176 448 252 448 340
-       C448 450 362 536 256 536
-       C150 536 64 450 64 340
-       C64 252 123 176 208 154
-       Z"
-    fill="none"
-    stroke="#B88A3A"
-    stroke-width="34"
-    stroke-linejoin="round"
-  />
+  <g fill="none" stroke="#B88A3A" stroke-linecap="round" stroke-linejoin="round">
 
-  <!-- top point -->
-  <path
-    d="M256 28 L302 132 H210 Z"
-    fill="#B88A3A"
-  />
+    <!-- Outer ring -->
+    <path
+      d="M256 116
+         C366 116 444 202 444 320
+         C444 438 366 524 256 524
+         C146 524 68 438 68 320
+         C68 202 146 116 256 116Z"
+      stroke-width="30"
+    />
 
-  <!-- bottom point -->
-  <path
-    d="M256 612 L210 508 H302 Z"
-    fill="#B88A3A"
-  />
+    <!-- Vertical spine -->
+    <path
+      d="M256 48
+         L256 160
+         M256 480
+         L256 592"
+      stroke-width="30"
+    />
 
-  <!-- center core -->
-  <path
-    d="M256 210
-       L324 320
-       L256 430
-       L188 320
-       Z"
-    fill="#050505"
-    stroke="#B88A3A"
-    stroke-width="30"
-    stroke-linejoin="round"
-  />
+    <!-- Top point -->
+    <path
+      d="M256 48
+         L300 146
+         L212 146
+         Z"
+      fill="#B88A3A"
+      stroke="none"
+    />
 
-  <!-- inner cut -->
-  <path
-    d="M256 270
-       L288 320
-       L256 370
-       L224 320
-       Z"
-    fill="#B88A3A"
-  />
+    <!-- Bottom point -->
+    <path
+      d="M256 592
+         L212 494
+         L300 494
+         Z"
+      fill="#B88A3A"
+      stroke="none"
+    />
+
+    <!-- Center core -->
+    <path
+      d="M256 214
+         L330 320
+         L256 426
+         L182 320
+         Z"
+      stroke-width="28"
+    />
+
+    <!-- Inner ember -->
+    <path
+      d="M256 278
+         L286 320
+         L256 362
+         L226 320
+         Z"
+      fill="#B88A3A"
+      stroke="none"
+    />
+
+  </g>
 </svg>
